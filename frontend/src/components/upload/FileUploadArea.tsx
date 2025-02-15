@@ -1,64 +1,62 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-// import { Toast } from "@/components/ui/toast";
-import Papa from "papaparse";
+import { Progress } from "@/components/ui/progress";
+import { api } from "../../services/api";
 
 interface FileUploadAreaProps {
-  onFileSelect: (file: File) => void;
+  onDataLoaded: (data: any[]) => void;
 }
 
-const FileUploadArea = ({ onFileSelect }: FileUploadAreaProps) => {
+const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [fileId, setFileId] = useState<string | null>(null);
 
-  const handleFileParsing = async (file: File) => {
-    setLoading(true);
-    setError(null);
-
-    // Show file size in MB
-    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-
-    try {
-      // For large files, we'll show a loading state right in the upload area
-      setSuccess(`Processing ${file.name} (${fileSizeMB} MB)...`);
-
-      Papa.parse(file, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        chunk: (results, parser) => {
-          // Handle chunks for large files
-          console.log("Processing chunk:", results.data.length, "rows");
-        },
-        complete: (results) => {
+  const checkUploadStatus = useCallback(
+    async (id: string) => {
+      try {
+        const { status } = await api.getUploadStatus(id);
+        if (status.status === "processing") {
+          setProgress((status.processed / status.total) * 100);
+          setTimeout(() => checkUploadStatus(id), 1000); // Poll every second
+        } else if (status.status === "completed") {
+          setProgress(100);
+          const { data } = await api.getData({});
+          onDataLoaded(data);
           setLoading(false);
-          setSuccess(`Successfully loaded ${file.name}`);
-          onFileSelect(file);
-        },
-        error: (error) => {
+        } else if (status.status === "error") {
+          setError("Error processing file");
           setLoading(false);
-          setError(`Error parsing file: ${error.message}`);
-        },
-      });
-    } catch (err) {
-      setLoading(false);
-      setError("Error processing file");
-    }
-  };
+        }
+      } catch (err) {
+        setError("Error checking upload status");
+        setLoading(false);
+      }
+    },
+    [onDataLoaded]
+  );
 
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
-    // Handle rejected files (non-CSV)
-    if (rejectedFiles.length > 0) {
-      setError("Please upload a CSV file");
-      return;
-    }
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (!file) return;
 
-    const file = acceptedFiles[0];
-    if (file) {
-      handleFileParsing(file);
-    }
-  }, []);
+      setLoading(true);
+      setError(null);
+      setProgress(0);
+
+      try {
+        const { fileId } = await api.uploadCSV(file);
+        setFileId(fileId);
+        checkUploadStatus(fileId);
+      } catch (err) {
+        setError("Error uploading file");
+        setLoading(false);
+      }
+    },
+    [checkUploadStatus]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -82,13 +80,19 @@ const FileUploadArea = ({ onFileSelect }: FileUploadAreaProps) => {
 
         {loading ? (
           <div className="space-y-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bmw-blue mx-auto"></div>
-            <p className="text-sm sm:text-base text-gray-500">
-              Processing large CSV file, please wait...
+            <div className="w-full">
+              <div className="flex justify-between text-sm text-gray-600 mb-1">
+                <span>Processing CSV file...</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="w-full" />
+            </div>
+            <p className="text-sm text-gray-500">
+              Large files may take a few moments to process
             </p>
           </div>
         ) : (
-          <>
+          <div>
             <p className="text-sm sm:text-base text-gray-500">
               Drag and drop your CSV file here, or click to select
             </p>
@@ -99,46 +103,11 @@ const FileUploadArea = ({ onFileSelect }: FileUploadAreaProps) => {
             >
               Select File
             </button>
-          </>
+          </div>
         )}
 
-        {/* Status Messages */}
         {error && <div className="mt-4 text-red-500 text-sm">{error}</div>}
-        {success && !loading && (
-          <div className="mt-4 text-green-500 text-sm">{success}</div>
-        )}
       </div>
-
-      {/* Controls - only show when file is successfully loaded */}
-      {success && !loading && !error && (
-        <div className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              X Axis
-            </label>
-            <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-              <option>Select variable</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Y Axis
-            </label>
-            <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-              <option>Select variable</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Chart Type
-            </label>
-            <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-              <option>Line Chart</option>
-              <option>Scatter Plot</option>
-            </select>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
