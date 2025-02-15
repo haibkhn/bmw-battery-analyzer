@@ -1,3 +1,11 @@
+export interface ProcessStatus {
+  status: "processing" | "completed" | "error";
+  processed: number;
+  total: number;
+  data?: any[];
+  error?: string;
+}
+
 export interface CSVData {
   cycle_number: number;
   capacity?: number;
@@ -6,11 +14,4 @@ export interface CSVData {
   voltage?: number;
 }
 
-export type ChartType = "2D" | "3D";
-
-export interface ChartConfig {
-  type: ChartType;
-  xAxis: string;
-  yAxis: string;
-  zAxis?: string;
-}
+export type ChartType = "line" | "scatter";

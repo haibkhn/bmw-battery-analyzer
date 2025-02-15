@@ -1,36 +1,35 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Progress } from "@/components/ui/progress";
 import { api } from "../../services/api";
+import { CSVData } from "../../types";
 
 interface FileUploadAreaProps {
-  onDataLoaded: (data: any[]) => void;
+  onDataLoaded: (data: CSVData[]) => void;
 }
 
 const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [fileId, setFileId] = useState<string | null>(null);
 
-  const checkUploadStatus = useCallback(
-    async (id: string) => {
+  const checkStatus = useCallback(
+    async (fileId: string) => {
       try {
-        const { status } = await api.getUploadStatus(id);
+        const status = await api.getStatus(fileId);
+
         if (status.status === "processing") {
-          setProgress((status.processed / status.total) * 100);
-          setTimeout(() => checkUploadStatus(id), 1000); // Poll every second
-        } else if (status.status === "completed") {
+          setProgress((status.processed / (status.total || 1)) * 100);
+          setTimeout(() => checkStatus(fileId), 500);
+        } else if (status.status === "completed" && status.data) {
           setProgress(100);
-          const { data } = await api.getData({});
-          onDataLoaded(data);
           setLoading(false);
+          onDataLoaded(status.data);
         } else if (status.status === "error") {
-          setError("Error processing file");
+          setError(status.error || "Error processing file");
           setLoading(false);
         }
       } catch (err) {
-        setError("Error checking upload status");
+        setError("Error checking file status");
         setLoading(false);
       }
     },
@@ -47,15 +46,18 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
       setProgress(0);
 
       try {
-        const { fileId } = await api.uploadCSV(file);
-        setFileId(fileId);
-        checkUploadStatus(fileId);
+        const response = await api.uploadFile(file);
+        if (response.success) {
+          checkStatus(response.fileId);
+        } else {
+          throw new Error(response.error || "Upload failed");
+        }
       } catch (err) {
-        setError("Error uploading file");
+        setError(err instanceof Error ? err.message : "Error uploading file");
         setLoading(false);
       }
     },
-    [checkUploadStatus]
+    [checkStatus]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -80,15 +82,14 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
 
         {loading ? (
           <div className="space-y-4">
-            <div className="w-full">
-              <div className="flex justify-between text-sm text-gray-600 mb-1">
-                <span>Processing CSV file...</span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <Progress value={progress} className="w-full" />
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-bmw-blue h-2 rounded-full transition-all"
+                style={{ width: `${progress}%` }}
+              />
             </div>
             <p className="text-sm text-gray-500">
-              Large files may take a few moments to process
+              Processing CSV file... {Math.round(progress)}%
             </p>
           </div>
         ) : (
