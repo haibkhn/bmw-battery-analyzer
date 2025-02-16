@@ -1,11 +1,13 @@
 export type CSVType = "2_column" | "4_column";
 
 export interface BatteryData {
+  id?: number;
   cycle_number: number;
   capacity?: number;
   time?: number;
   current?: number;
   voltage?: number;
+  created_at?: string;
 }
 
 export interface ProcessStatus {

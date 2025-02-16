@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { api } from "../../services/api";
-import { BatteryData } from "../../types";
+import { BatteryData, ProcessStatus, DataResponse } from "../../types";
 
 interface FileUploadAreaProps {
-  onDataLoaded: (data: BatteryData[]) => void;
+  onDataLoaded: (response: DataResponse) => void;
 }
 
 const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
@@ -22,11 +22,18 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
           setTimeout(() => checkStatus(fileId), 500);
         } else if (status.status === "completed") {
           setProgress(100);
-          // Add logging here
-          console.log("Upload completed, fetching data...");
-          const { data } = await api.getData();
-          console.log("Received data:", data.length, "rows");
-          onDataLoaded(data);
+          try {
+            console.log("Fetching data after completion...");
+            const response = await api.getData();
+            console.log("Data received:", {
+              totalRows: response.data.length,
+              type: response.stats.type,
+            });
+            onDataLoaded(response); // Pass the complete response
+          } catch (error) {
+            console.error("Error loading data:", error);
+            setError("Error loading data after processing");
+          }
           setLoading(false);
         } else if (status.status === "error") {
           setError(status.error || "Error processing file");
@@ -43,9 +50,6 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      // Don't allow new uploads while processing
-      if (loading) return;
-
       const file = acceptedFiles[0];
       if (!file) return;
 
@@ -56,12 +60,7 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
       try {
         const response = await api.uploadFile(file);
         if (response.success) {
-          console.log(
-            "Upload successful, checking status for:",
-            response.fileId
-          );
-          // Add a small delay before first status check
-          setTimeout(() => checkStatus(response.fileId), 500);
+          checkStatus(response.fileId);
         } else {
           throw new Error(response.error || "Upload failed");
         }
@@ -70,7 +69,7 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
         setLoading(false);
       }
     },
-    [checkStatus, loading]
+    [checkStatus]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -79,7 +78,6 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
       "text/csv": [".csv"],
     },
     multiple: false,
-    disabled: loading, // Disable dropzone while processing
   });
 
   return (

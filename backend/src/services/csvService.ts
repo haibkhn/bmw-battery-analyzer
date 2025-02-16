@@ -286,12 +286,33 @@ export class CSVService {
 
       console.log(`Retrieved ${data.length} rows`);
 
-      // Determine type from first row
-      const type: CSVType =
-        firstRow.capacity !== undefined ? "2_column" : "4_column";
+      // Determine type by checking which columns have values
+      const type: CSVType = firstRow.time !== null ? "4_column" : "2_column";
+      console.log("Detected CSV type:", type);
 
-      // Calculate ranges
-      const ranges = await this.calculateRanges(type);
+      // Calculate ranges based on type
+      const columns =
+        type === "2_column"
+          ? ["cycle_number", "capacity"]
+          : ["cycle_number", "time", "current", "voltage"];
+
+      const ranges: { [key: string]: { min: number; max: number } } = {};
+
+      for (const column of columns) {
+        const result = await db("battery_data")
+          .min(`${column} as min`)
+          .max(`${column} as max`)
+          .first();
+
+        if (result) {
+          ranges[column] = {
+            min: Number(result.min),
+            max: Number(result.max),
+          };
+        }
+      }
+
+      console.log("Data ranges:", ranges);
 
       return {
         data,
