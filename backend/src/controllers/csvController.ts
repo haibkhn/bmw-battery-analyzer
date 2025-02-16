@@ -69,20 +69,22 @@ export const csvController = {
 
   getData: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { startCycle, endCycle, limit = 1000, offset = 0 } = req.query;
+      console.log("Fetching data from service...");
 
-      const data = await csvService.getData({
-        startCycle: startCycle ? parseInt(startCycle as string) : undefined,
-        endCycle: endCycle ? parseInt(endCycle as string) : undefined,
-        limit: parseInt(limit as string),
-        offset: parseInt(offset as string),
+      const result = await csvService.getData();
+
+      console.log("Data fetched:", {
+        rowCount: result.data.length,
+        stats: result.stats,
       });
 
       res.json({
         success: true,
-        data,
+        data: result.data,
+        stats: result.stats,
       });
     } catch (error) {
+      console.error("Error fetching data:", error);
       res.status(500).json({
         success: false,
         message: "Error retrieving data",

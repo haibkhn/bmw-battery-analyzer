@@ -13,39 +13,29 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
   const [error, setError] = useState<string | null>(null);
 
   const checkStatus = useCallback(
-    async (fileId: string, retryCount = 0) => {
+    async (fileId: string) => {
       try {
-        console.log("Checking status for:", fileId);
         const { status } = await api.getStatus(fileId);
 
         if (status.status === "processing") {
           setProgress((status.processed / status.total) * 100);
-          // Continue polling
           setTimeout(() => checkStatus(fileId), 500);
         } else if (status.status === "completed") {
           setProgress(100);
-          try {
-            const { data } = await api.getData({ limit: 1000, offset: 0 });
-            onDataLoaded(data);
-            setLoading(false);
-          } catch (error) {
-            console.error("Error fetching data:", error);
-            setError("Error fetching data after processing");
-            setLoading(false);
-          }
+          // Add logging here
+          console.log("Upload completed, fetching data...");
+          const { data } = await api.getData();
+          console.log("Received data:", data.length, "rows");
+          onDataLoaded(data);
+          setLoading(false);
         } else if (status.status === "error") {
           setError(status.error || "Error processing file");
           setLoading(false);
         }
       } catch (err) {
-        // Add retry logic with a maximum number of retries
-        if (retryCount < 5) {
-          console.log(`Retry ${retryCount + 1} for fileId:`, fileId);
-          setTimeout(() => checkStatus(fileId, retryCount + 1), 1000);
-        } else {
-          setError("Failed to check file status");
-          setLoading(false);
-        }
+        console.error("Error in checkStatus:", err);
+        setError("Error checking file status");
+        setLoading(false);
       }
     },
     [onDataLoaded]

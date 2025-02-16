@@ -49,8 +49,8 @@ const ChartArea = ({ data, availableColumns }: ChartAreaProps) => {
     const yMax = Math.max(...yValues);
 
     // Add 2% padding
-    const xPadding = (xMax - xMin) * 0.02;
-    const yPadding = (yMax - yMin) * 0.02;
+    // const xPadding = (xMax - xMin) * 0.02;
+    // const yPadding = (yMax - yMin) * 0.02;
 
     console.log("Chart Ranges:", {
       x: `${xMin} - ${xMax}`,
@@ -58,8 +58,8 @@ const ChartArea = ({ data, availableColumns }: ChartAreaProps) => {
     });
 
     return {
-      x: [xMin - xPadding, xMax + xPadding],
-      y: [yMin - yPadding, yMax + yPadding],
+      x: [xMin, xMax],
+      y: [yMin, yMax],
     };
   }, [data, config.xAxis, config.yAxis]);
 

@@ -1,5 +1,10 @@
 import axios from "axios";
-import { UploadResponse, ProcessStatus, BatteryData } from "../types";
+import {
+  BatteryData,
+  ProcessStatus,
+  UploadResponse,
+  DataResponse,
+} from "../types";
 
 const BASE_URL = "http://localhost:3000/api/csv";
 
@@ -19,18 +24,14 @@ export const api = {
   async getStatus(
     fileId: string
   ): Promise<{ success: boolean; status: ProcessStatus }> {
-    console.log("Requesting status for:", `${BASE_URL}/status/${fileId}`);
     const response = await axios.get(`${BASE_URL}/status/${fileId}`);
     return response.data;
   },
 
-  async getData(params: {
-    startCycle?: number;
-    endCycle?: number;
-    limit?: number;
-    offset?: number;
-  }): Promise<{ success: boolean; data: BatteryData[] }> {
-    const response = await axios.get(`${BASE_URL}/data`, { params });
+  async getData(): Promise<DataResponse> {
+    console.log("Fetching data from API...");
+    const response = await axios.get<DataResponse>(`${BASE_URL}/data`);
+    console.log("API Response:", response.data);
     return response.data;
   },
 };

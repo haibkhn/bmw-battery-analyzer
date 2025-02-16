@@ -1,3 +1,5 @@
+export type CSVType = "2_column" | "4_column";
+
 export interface BatteryData {
   cycle_number: number;
   capacity?: number;
@@ -11,7 +13,7 @@ export interface ProcessStatus {
   status: "processing" | "completed" | "error";
   processed: number;
   total: number;
-  data?: BatteryData[];
+  csvType?: CSVType;
   error?: string;
 }
 
@@ -20,6 +22,18 @@ export interface UploadResponse {
   message: string;
   fileId: string;
   error?: string;
+}
+
+export interface DataResponse {
+  success: boolean;
+  data: BatteryData[];
+  stats: {
+    totalRows: number;
+    type: CSVType;
+    ranges: {
+      [key: string]: { min: number; max: number };
+    };
+  };
 }
 
 export interface ChartConfig {

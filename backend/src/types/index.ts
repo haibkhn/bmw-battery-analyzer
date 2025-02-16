@@ -1,3 +1,5 @@
+export type CSVType = "2_column" | "4_column";
+
 export interface BatteryData {
   cycle_number: number;
   capacity?: number;
@@ -11,6 +13,7 @@ export interface ProcessStatus {
   status: "processing" | "completed" | "error";
   processed: number;
   total: number;
+  csvType?: CSVType;
   error?: string;
 }
 
