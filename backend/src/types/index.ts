@@ -1,15 +1,9 @@
-export type CSVType = "2_column" | "4_column";
-
-export interface TwoColumnData {
+export interface BatteryData {
   cycle_number: number;
-  capacity: number;
-}
-
-export interface FourColumnData {
-  cycle_number: number;
-  time: number;
-  current: number;
-  voltage: number;
+  capacity?: number;
+  time?: number;
+  current?: number;
+  voltage?: number;
 }
 
 export interface ProcessStatus {
@@ -17,13 +11,12 @@ export interface ProcessStatus {
   status: "processing" | "completed" | "error";
   processed: number;
   total: number;
-  csvType?: CSVType;
   error?: string;
 }
 
 export interface UploadResponse {
   success: boolean;
   message: string;
-  fileId?: string;
+  fileId: string;
   error?: string;
 }

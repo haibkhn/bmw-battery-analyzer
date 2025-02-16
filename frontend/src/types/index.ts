@@ -1,12 +1,4 @@
-export interface ProcessStatus {
-  status: "processing" | "completed" | "error";
-  processed: number;
-  total: number;
-  data?: any[];
-  error?: string;
-}
-
-export interface CSVData {
+export interface BatteryData {
   cycle_number: number;
   capacity?: number;
   time?: number;
@@ -14,4 +6,24 @@ export interface CSVData {
   voltage?: number;
 }
 
-export type ChartType = "line" | "scatter";
+export interface ProcessStatus {
+  fileId: string;
+  status: "processing" | "completed" | "error";
+  processed: number;
+  total: number;
+  data?: BatteryData[];
+  error?: string;
+}
+
+export interface UploadResponse {
+  success: boolean;
+  message: string;
+  fileId: string;
+  error?: string;
+}
+
+export interface ChartConfig {
+  xAxis: string;
+  yAxis: string;
+  type: "line" | "scatter";
+}

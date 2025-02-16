@@ -2,38 +2,23 @@ import { useState } from "react";
 import MainLayout from "./components/layout/MainLayout";
 import FileUploadArea from "./components/upload/FileUploadArea";
 import ChartArea from "./components/charts/ChartArea";
+import { BatteryData } from "./types";
 
 function App() {
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [chartConfig, setChartConfig] = useState({
-    xAxis: "",
-    yAxis: "",
-    chartType: "line" as const,
-  });
+  const [data, setData] = useState<BatteryData[]>([]);
+  const [columns, setColumns] = useState<string[]>([]);
 
-  const handleDataLoaded = (data: any[]) => {
-    setChartData(data);
-    if (data.length > 0) {
-      const columns = Object.keys(data[0]);
-      setChartConfig((prev) => ({
-        ...prev,
-        xAxis: columns[0],
-        yAxis: columns[1],
-      }));
+  const handleDataLoaded = (newData: BatteryData[]) => {
+    setData(newData);
+    if (newData.length > 0) {
+      setColumns(Object.keys(newData[0]));
     }
   };
 
   return (
     <MainLayout>
       <FileUploadArea onDataLoaded={handleDataLoaded} />
-      {chartData.length > 0 && (
-        <ChartArea
-          data={chartData}
-          xAxis={chartConfig.xAxis}
-          yAxis={chartConfig.yAxis}
-          chartType={chartConfig.chartType}
-        />
-      )}
+      {data.length > 0 && <ChartArea data={data} availableColumns={columns} />}
     </MainLayout>
   );
 }

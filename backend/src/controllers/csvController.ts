@@ -5,15 +5,20 @@ import { v4 as uuidv4 } from "uuid";
 export const csvController = {
   uploadFile: async (req: Request, res: Response): Promise<void> => {
     try {
+      console.log("Upload request received");
+      console.log("File:", req.file);
+
       if (!req.file) {
+        console.log("No file in request");
         res.status(400).json({
           success: false,
-          error: "No file uploaded",
+          message: "No file uploaded",
         });
         return;
       }
 
       const fileId = uuidv4();
+      console.log("Generated fileId:", fileId);
 
       // Start processing in background
       csvService
@@ -26,44 +31,62 @@ export const csvController = {
         fileId,
       });
     } catch (error) {
+      console.error("Upload error:", error);
       res.status(500).json({
         success: false,
-        error: "Error uploading file",
+        message: "Error uploading file",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   },
 
   getProcessStatus: async (req: Request, res: Response): Promise<void> => {
-    const { fileId } = req.params;
-    const status = csvService.getProcessStatus(fileId);
+    try {
+      console.log("Status request received for fileId:", req.params.fileId);
+      const { fileId } = req.params;
+      const status = csvService.getProcessStatus(fileId);
 
-    if (!status) {
-      res.status(404).json({
+      console.log("Status found:", status);
+
+      if (!status) {
+        res.status(404).json({
+          success: false,
+          message: "File not found",
+        });
+        return;
+      }
+
+      res.json({ success: true, status });
+    } catch (error) {
+      console.error("Error in getProcessStatus:", error);
+      res.status(500).json({
         success: false,
-        error: "File not found",
+        message: "Error checking status",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
-      return;
     }
-
-    res.json({ success: true, status });
   },
 
   getData: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { startCycle, endCycle, limit, offset } = req.query;
+      const { startCycle, endCycle, limit = 1000, offset = 0 } = req.query;
 
       const data = await csvService.getData({
         startCycle: startCycle ? parseInt(startCycle as string) : undefined,
         endCycle: endCycle ? parseInt(endCycle as string) : undefined,
-        limit: limit ? parseInt(limit as string) : undefined,
-        offset: offset ? parseInt(offset as string) : undefined,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string),
       });
 
-      res.json({ success: true, data });
+      res.json({
+        success: true,
+        data,
+      });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: "Error retrieving data",
+        message: "Error retrieving data",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   },

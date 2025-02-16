@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { api } from "../../services/api";
-import { CSVData } from "../../types";
+import { BatteryData } from "../../types";
 
 interface FileUploadAreaProps {
-  onDataLoaded: (data: CSVData[]) => void;
+  onDataLoaded: (data: BatteryData[]) => void;
 }
 
 const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
@@ -13,24 +13,39 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
   const [error, setError] = useState<string | null>(null);
 
   const checkStatus = useCallback(
-    async (fileId: string) => {
+    async (fileId: string, retryCount = 0) => {
       try {
-        const status = await api.getStatus(fileId);
+        console.log("Checking status for:", fileId);
+        const { status } = await api.getStatus(fileId);
 
         if (status.status === "processing") {
-          setProgress((status.processed / (status.total || 1)) * 100);
+          setProgress((status.processed / status.total) * 100);
+          // Continue polling
           setTimeout(() => checkStatus(fileId), 500);
-        } else if (status.status === "completed" && status.data) {
+        } else if (status.status === "completed") {
           setProgress(100);
-          setLoading(false);
-          onDataLoaded(status.data);
+          try {
+            const { data } = await api.getData({ limit: 1000, offset: 0 });
+            onDataLoaded(data);
+            setLoading(false);
+          } catch (error) {
+            console.error("Error fetching data:", error);
+            setError("Error fetching data after processing");
+            setLoading(false);
+          }
         } else if (status.status === "error") {
           setError(status.error || "Error processing file");
           setLoading(false);
         }
       } catch (err) {
-        setError("Error checking file status");
-        setLoading(false);
+        // Add retry logic with a maximum number of retries
+        if (retryCount < 5) {
+          console.log(`Retry ${retryCount + 1} for fileId:`, fileId);
+          setTimeout(() => checkStatus(fileId, retryCount + 1), 1000);
+        } else {
+          setError("Failed to check file status");
+          setLoading(false);
+        }
       }
     },
     [onDataLoaded]
@@ -38,6 +53,9 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
+      // Don't allow new uploads while processing
+      if (loading) return;
+
       const file = acceptedFiles[0];
       if (!file) return;
 
@@ -48,7 +66,12 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
       try {
         const response = await api.uploadFile(file);
         if (response.success) {
-          checkStatus(response.fileId);
+          console.log(
+            "Upload successful, checking status for:",
+            response.fileId
+          );
+          // Add a small delay before first status check
+          setTimeout(() => checkStatus(response.fileId), 500);
         } else {
           throw new Error(response.error || "Upload failed");
         }
@@ -57,7 +80,7 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
         setLoading(false);
       }
     },
-    [checkStatus]
+    [checkStatus, loading]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -66,6 +89,7 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
       "text/csv": [".csv"],
     },
     multiple: false,
+    disabled: loading, // Disable dropzone while processing
   });
 
   return (
