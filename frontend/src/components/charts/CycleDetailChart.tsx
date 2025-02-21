@@ -40,13 +40,21 @@ export const CycleDetailChart: React.FC<CycleDetailChartProps> = ({
         </button>
       </div>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={cycleData}>
+        <LineChart
+          data={cycleData}
+          margin={{ top: 10, right: 60, left: 60, bottom: 60 }} // Adjusted margins for dual Y-axes
+        >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="relativeTime"
             domain={domains.time}
             type="number"
-            label={{ value: "Time (s)", position: "bottom" }}
+            label={{
+              value: "Time (s)",
+              position: "bottom",
+              offset: 40,
+            }}
+            tickFormatter={(value) => value.toFixed(2)}
           />
           <YAxis
             yAxisId="voltage"
@@ -55,7 +63,10 @@ export const CycleDetailChart: React.FC<CycleDetailChartProps> = ({
               value: "Voltage (V)",
               angle: -90,
               position: "insideLeft",
+              offset: -10,
+              style: { textAnchor: "middle" },
             }}
+            tickFormatter={(value) => value.toFixed(2)}
           />
           <YAxis
             yAxisId="current"
@@ -65,7 +76,10 @@ export const CycleDetailChart: React.FC<CycleDetailChartProps> = ({
               value: "Current (A)",
               angle: 90,
               position: "insideRight",
+              offset: 10,
+              style: { textAnchor: "middle" },
             }}
+            tickFormatter={(value) => value.toFixed(2)}
           />
           <Tooltip
             formatter={(value: number, name: string) => [

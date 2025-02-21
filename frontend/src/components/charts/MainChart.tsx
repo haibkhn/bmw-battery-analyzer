@@ -20,7 +20,7 @@ interface MainChartProps {
   onChartClick: (point: any) => void;
   getMetricLabel: (value: string) => string;
   showDots?: boolean;
-  isFullWidth?: boolean;
+  isDetailView?: boolean;
 }
 
 export const MainChart: React.FC<MainChartProps> = ({
@@ -30,13 +30,17 @@ export const MainChart: React.FC<MainChartProps> = ({
   onChartClick,
   getMetricLabel,
   showDots = false,
-  isFullWidth = true,
+  isDetailView,
 }) => {
   return (
-    <div className={`h-[400px] ${isFullWidth ? "w-full" : "w-full lg:w-1/2"}`}>
+    <div className={`h-[400px] ${isDetailView ? "w-full lg:w-1/2" : "w-full"}`}>
       <ResponsiveContainer width="100%" height="100%">
         {config.type === "line" ? (
-          <LineChart data={data} onClick={onChartClick}>
+          <LineChart
+            data={data}
+            onClick={onChartClick}
+            margin={{ top: 10, right: 30, left: 60, bottom: 50 }} // Added margins
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey={config.xAxis}
@@ -45,7 +49,9 @@ export const MainChart: React.FC<MainChartProps> = ({
               label={{
                 value: getMetricLabel(config.xAxis),
                 position: "bottom",
+                offset: 10, // Increased offset
               }}
+              tickFormatter={(value) => value.toFixed(2)} // Format ticks to prevent overlap
             />
             <YAxis
               domain={domains.y}
@@ -54,12 +60,15 @@ export const MainChart: React.FC<MainChartProps> = ({
                 value: getMetricLabel(config.yAxis),
                 angle: -90,
                 position: "insideLeft",
+                offset: -0, // Adjusted offset
+                style: { textAnchor: "middle" }, // Better text alignment
               }}
+              tickFormatter={(value) => value.toFixed(2)} // Format ticks to prevent overlap
             />
             <Tooltip
               formatter={(value: number) => value.toFixed(4)}
               labelFormatter={(label: number) =>
-                `${getMetricLabel(config.xAxis)}: ${label}`
+                `${getMetricLabel(config.xAxis)}: ${label.toFixed(2)}`
               }
             />
             <Line
@@ -71,7 +80,10 @@ export const MainChart: React.FC<MainChartProps> = ({
             />
           </LineChart>
         ) : (
-          <ScatterChart onClick={onChartClick}>
+          <ScatterChart
+            onClick={onChartClick}
+            margin={{ top: 10, right: 30, left: 60, bottom: 50 }} // Added margins
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey={config.xAxis}
@@ -80,7 +92,9 @@ export const MainChart: React.FC<MainChartProps> = ({
               label={{
                 value: getMetricLabel(config.xAxis),
                 position: "bottom",
+                offset: 40, // Increased offset
               }}
+              tickFormatter={(value) => value.toFixed(2)}
             />
             <YAxis
               domain={domains.y}
@@ -89,12 +103,15 @@ export const MainChart: React.FC<MainChartProps> = ({
                 value: getMetricLabel(config.yAxis),
                 angle: -90,
                 position: "insideLeft",
+                offset: -45, // Adjusted offset
+                style: { textAnchor: "middle" },
               }}
+              tickFormatter={(value) => value.toFixed(2)}
             />
             <Tooltip
               formatter={(value: number) => value.toFixed(4)}
               labelFormatter={(label: number) =>
-                `${getMetricLabel(config.xAxis)}: ${label}`
+                `${getMetricLabel(config.xAxis)}: ${label.toFixed(2)}`
               }
             />
             <Scatter data={data} fill="#0066B1" isAnimationActive={false} />

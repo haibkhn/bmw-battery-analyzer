@@ -143,7 +143,10 @@ const ChartArea: React.FC<ChartAreaProps> = ({ data, type }) => {
         type={type}
       />
 
-      <div className={`flex ${showDetail ? "flex-col lg:flex-row" : ""} gap-4`}>
+      {/* Updated container div */}
+      <div
+        className={`${showDetail ? "flex flex-col lg:flex-row justify-between" : ""} gap-4`}
+      >
         <MainChart
           data={type === "4_column" ? cycleStats : data}
           config={config}
@@ -151,6 +154,7 @@ const ChartArea: React.FC<ChartAreaProps> = ({ data, type }) => {
           onChartClick={handleChartClick}
           getMetricLabel={getMetricLabel}
           showDots={data.length < 100}
+          isDetailView={showDetail}
         />
 
         {showDetail && selectedCycle && type === "4_column" && (
