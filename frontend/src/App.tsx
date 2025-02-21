@@ -27,7 +27,7 @@ function App() {
     <MainLayout>
       <FileUploadArea onDataLoaded={handleDataLoaded} />
       {data.length > 0 && columns.length > 0 && (
-        <ChartArea data={data} availableColumns={columns} type={csvType} />
+        <ChartArea data={data} type={csvType} />
       )}
     </MainLayout>
   );

@@ -1,0 +1,71 @@
+The CSV structure for e.g. cell test data will vary in their structures regarding number of columns and rows but usually the header with some specific information of the cell test should be always the same for one CSV data type. To provide you some assistance on this topic please find enclosed some generic sample files for cell test data as CSV files. So your app solution should be able to provide the user in the UI the possibility to select one of this CSV file, display the entity/variable for each column as e.g. X (e.g. cycle number or time), Y (e.g. capacity), Z (e.g. voltage) etc. and then the user can select which entities should be visualized. Data volume vs. Loading time is where more attention should be given. And also graph manipulation like zoom in. Panning etc
+
+Application for a Full Stock Development for battery development
+Qualification test
+
+
+Introduction
+
+Thank you for your interest and application for the advertised internship with full stock development for battery development at BMW and Battery Cell Competence Center (BCCC).
+Due to a high number of applications for this internship position, we would like to ask you to make the following aptitude and qualification test, respectively, which allows us to better assess your qualification and performance for the further application process.
+
+This aptitude and qualification test, respectively, is absolutely voluntary but would help us to evaluate your application.
+
+Speed, quality of coding, new innovative ideas and presentation of the results would be some possible criteria.
+
+
+Task Overview
+
+Develop a robust data analysis tool that efficiently visualizes plots and graphs from large CSV files. The tool should be user-friendly and capable of handling big data with various interactive features.
+
+Key Objectives
+
+•	Create an intuitive interface using React JS (Vite) for the front end.
+•	Develop a scalable backend service using Node.js.
+•	Implement functionality for parsing and processing large CSV files and SQL dataset.
+
+Front End Requirements
+
+•	Use React JS (Vite) to ensure quick project setup and build optimizations.
+•	Design a responsive UI that adopts to different screen sizes and devices.
+•	Implement features for users to upload CSV files.
+•	Provide interactive and responsive data visualization components (e.g., line plots, multi-line plots, scatter plots).
+•	Include options to manipulate visualization parameters such as type of chart, colors, axis labels, etc.
+
+ 
+Back End Requirements 
+ 
+
+ 
+
+
+
+
+
+•	Develop a Node.js server capable of handling large data uploads and processing.
+•	Implement efficient algorithms for real-time data parsing and aggregation.
+
+Features
+
+•	Zoom In/Out: Allow users to explore details within plots by zooming in and out.
+•	Download Plots: Enable users to download visualized plots.
+•	Change Plot Parameters: Users should be able to adjust plot settings like data ranges, oxes, legends, and types of plots.
+•	Data Filtering: Provide functionalities for users to filter the data they want to visualize.
+•	Additional Features: Any additional feature such as applying mathematical equation etc.
+
+
+Evaluation Metrics
+
+•	Loading Speed: Time token to load the application and render initial visualizations.
+•	Big Data Handling: Ability to visualize large datasets without significant performance degradation, also mention in the report the loading speed of chart for 1 OMB data.
+•	Interoctivil:y: Responsiveness of the interactive elements like zooming, filtering, and parameter adjustments.
+•	User Experience: Intuitiveness and ease of use of the tool.
+•	Scalability: The tool should perform consistently as the number of concurrent users or data size scales up.
+•	Error Handling: Graceful handling of errors and exceptions with proper user feedback.
+
+Submission Guidelines
+
+•	The project must be submitted via a GitHub repository with proper documentation.
+•	Include a README file with setup instructions, dependencies, and a brief overview of the tool.
+•	Provide a demo video showcasing the tool's features and capabilities or host your solution by using Netlify or Girhub so thot testing of your provided solution can be carried out. Alternatively please contoinerize your solution by using Docker.
+•	Code should be clean, well-commented, and follow best practices.
