@@ -20,7 +20,9 @@ interface ChartAreaProps {
 const ChartArea: React.FC<ChartAreaProps> = ({ data, type }) => {
   const [selectedCycle, setSelectedCycle] = useState<number | null>(null);
   const [showDetail, setShowDetail] = useState(false);
-  const [mode, setMode] = useState<VisualizationMode>("overview");
+  const [mode, setMode] = useState<VisualizationMode>(() =>
+    type === "4_column" ? "overview" : "cycle_analysis"
+  );
   const [config, setConfig] = useState<ChartConfig>({
     xAxis: "cycle_number",
     yAxis: type === "2_column" ? "capacity" : "avg_voltage",
@@ -50,6 +52,29 @@ const ChartArea: React.FC<ChartAreaProps> = ({ data, type }) => {
     setSelectedCycle(null);
     setShowDetail(false);
   }, [type, mode]);
+
+  useEffect(() => {
+    console.log("ChartArea data check:", {
+      type,
+      dataLength: data.length,
+      samplePoint: data[0],
+      has4ColData: data.some(
+        (d) =>
+          d.time !== undefined &&
+          d.voltage !== undefined &&
+          d.current !== undefined
+      ),
+    });
+  }, [data, type]);
+
+  // Add debug logging for mode changes
+  useEffect(() => {
+    console.log("Mode changed:", {
+      mode,
+      type,
+      shouldShowOverview: type === "4_column" && mode === "overview",
+    });
+  }, [mode, type]);
 
   // Calculate domains for main chart
   const mainDomains = useMemo(() => {
@@ -170,7 +195,15 @@ const ChartArea: React.FC<ChartAreaProps> = ({ data, type }) => {
       >
         {type === "4_column" && mode === "overview" ? (
           <div className="w-full">
-            <CycleOverview data={data} cycles={cycles} />
+            <CycleOverview
+              data={data.filter(
+                (d) =>
+                  d.time !== undefined &&
+                  d.voltage !== undefined &&
+                  d.current !== undefined
+              )}
+              cycles={cycles}
+            />
           </div>
         ) : (
           <MainChart
