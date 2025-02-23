@@ -1,27 +1,26 @@
 import { useMemo } from "react";
-import { CSVType } from "../types";
-import { Metric } from "@/types/chart";
+import {
+  CSVType,
+  VisualizationMode,
+  Metric,
+  TWO_COLUMN_METRICS,
+  BASE_METRICS,
+  CYCLE_ANALYSIS_METRICS,
+} from "@/types";
 
-export const useMetrics = (type: CSVType): Metric[] => {
+export const useMetrics = (
+  type: CSVType,
+  mode: VisualizationMode = "overview"
+): Metric[] => {
   return useMemo(() => {
     if (type === "2_column") {
-      return [
-        { value: "cycle_number", label: "Cycle Number" },
-        { value: "capacity", label: "Capacity" },
-      ];
+      return TWO_COLUMN_METRICS;
     }
-    return [
-      { value: "cycle_number", label: "Cycle Number" },
-      { value: "avg_voltage", label: "Average Voltage" },
-      { value: "max_voltage", label: "Maximum Voltage" },
-      { value: "min_voltage", label: "Minimum Voltage" },
-      { value: "voltage_range", label: "Voltage Range" },
-      { value: "avg_current", label: "Average Current" },
-      { value: "max_current", label: "Maximum Current" },
-      { value: "min_current", label: "Minimum Current" },
-      { value: "current_range", label: "Current Range" },
-      { value: "duration", label: "Duration (s)" },
-      { value: "measurements", label: "Measurements Count" },
-    ];
-  }, [type]);
+
+    if (mode === "overview") {
+      return BASE_METRICS;
+    }
+
+    return CYCLE_ANALYSIS_METRICS;
+  }, [type, mode]);
 };
