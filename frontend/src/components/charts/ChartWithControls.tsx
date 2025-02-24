@@ -11,6 +11,11 @@ import {
   Brush,
 } from "recharts";
 import { FiZoomIn, FiZoomOut, FiRefreshCw, FiDownload } from "react-icons/fi";
+import {
+  ChartCustomization,
+  ChartStyle,
+  defaultChartStyle,
+} from "./ChartCustomization";
 
 interface ChartWithControlsProps {
   data: any[];
@@ -53,6 +58,10 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
   // Ref for Brush component
   const brushRef = useRef<any>(null);
 
+  const [chartStyle, setChartStyle] = useState<ChartStyle>(() =>
+    defaultChartStyle(lines)
+  );
+
   const handleReset = useCallback(() => {
     console.log("Resetting...");
     setCurrentXDomain(xAxis.domain);
@@ -84,9 +93,33 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
+      {/* Add title display */}
+      {chartStyle.title && (
+        <div className="absolute top-2 left-2 z-10">
+          <h3 className="text-sm font-medium text-gray-700">
+            {chartStyle.title}
+          </h3>
+        </div>
+      )}
+
       {/* Controls Overlay */}
       {showControls && (
         <div className="absolute top-2 right-2 z-10 flex gap-1 bg-white/80 rounded-lg p-1 shadow">
+          <ChartCustomization
+            lines={chartStyle.lines}
+            onLineStyleChange={(key, updates) => {
+              setChartStyle((prev) => ({
+                ...prev,
+                lines: prev.lines.map((line) =>
+                  line.key === key ? { ...line, ...updates } : line
+                ),
+              }));
+            }}
+            chartTitle={chartStyle.title}
+            onTitleChange={(title) =>
+              setChartStyle((prev) => ({ ...prev, title }))
+            }
+          />
           <button
             onClick={handleReset}
             className="p-1.5 rounded hover:bg-gray-200 text-gray-700"
@@ -96,7 +129,7 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
           </button>
           <button
             onClick={() => {
-              /* Download implementation */
+              /* Download implementation coming next */
             }}
             className="p-1.5 rounded hover:bg-gray-200 text-gray-700"
             title="Download"
@@ -110,7 +143,12 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={data}
-          margin={{ top: 20, right: 30, left: 60, bottom: 50 }}
+          margin={{
+            top: chartStyle.title ? 30 : 20,
+            right: 30,
+            left: 60,
+            bottom: 70,
+          }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
@@ -144,14 +182,16 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
             endIndex={brushEndIndex}
             onChange={handleBrush}
           />
-          {lines.map((line) => (
+          {/* Update Line components to use custom styles */}
+          {chartStyle.lines.map((line) => (
             <Line
               key={line.key}
               type="monotone"
               dataKey={line.key}
               name={line.name}
               stroke={line.color}
-              strokeWidth={2}
+              strokeWidth={line.strokeWidth}
+              strokeDasharray={line.strokeDasharray}
               dot={false}
               isAnimationActive={false}
               connectNulls
