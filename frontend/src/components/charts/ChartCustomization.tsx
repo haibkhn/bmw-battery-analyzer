@@ -1,5 +1,6 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { FiSettings } from "react-icons/fi";
+import { ColorPicker } from "./ColorPicker";
 
 interface LineStyle {
   key: string;
@@ -22,12 +23,14 @@ export const ChartCustomization: React.FC<ChartCustomizationProps> = ({
   chartTitle,
   onTitleChange,
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Handle clicks outside the panel
+  // Handle clicks outside
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (
         panelRef.current &&
@@ -42,7 +45,7 @@ export const ChartCustomization: React.FC<ChartCustomizationProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [isOpen]);
 
   return (
     <div className="relative">
@@ -64,14 +67,14 @@ export const ChartCustomization: React.FC<ChartCustomizationProps> = ({
         >
           {/* Chart Title */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
               Chart Title
             </label>
             <input
               type="text"
               value={chartTitle}
               onChange={(e) => onTitleChange(e.target.value)}
-              className="w-full px-2 py-1 border rounded"
+              className="w-full px-2 py-1 border rounded text-center"
               placeholder="Enter chart title"
             />
           </div>
@@ -85,13 +88,9 @@ export const ChartCustomization: React.FC<ChartCustomizationProps> = ({
                   {line.name}
                 </label>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={line.color}
-                    onChange={(e) =>
-                      onLineStyleChange(line.key, { color: e.target.value })
-                    }
-                    className="w-8 h-8"
+                  <ColorPicker
+                    color={line.color}
+                    onChange={(color) => onLineStyleChange(line.key, { color })}
                   />
                   <select
                     value={line.strokeWidth}
@@ -183,3 +182,5 @@ export const defaultChartStyle = (
     strokeWidth: 2,
   })),
 });
+
+export default ChartCustomization;

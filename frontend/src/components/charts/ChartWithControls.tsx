@@ -95,7 +95,7 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
     >
       {/* Add title display */}
       {chartStyle.title && (
-        <div className="absolute top-2 left-2 z-10">
+        <div className="absolute top-2 left-0 right-0 text-center z-10">
           <h3 className="text-sm font-medium text-gray-700">
             {chartStyle.title}
           </h3>
