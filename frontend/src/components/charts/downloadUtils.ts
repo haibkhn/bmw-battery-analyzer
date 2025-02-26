@@ -14,7 +14,7 @@ export const downloadChartAsImage = (
 
     convertToCanvas(containerRef.current as HTMLElement, {
       backgroundColor: "#ffffff",
-      scale: 2, // Higher quality
+      scale: 2,
       logging: false,
       useCORS: true,
     }).then((canvas) => {
