@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -10,12 +10,14 @@ import {
   ResponsiveContainer,
   Brush,
 } from "recharts";
-import { FiZoomIn, FiZoomOut, FiRefreshCw, FiDownload } from "react-icons/fi";
+import { FiRefreshCw } from "react-icons/fi";
 import {
   ChartCustomization,
   ChartStyle,
   defaultChartStyle,
 } from "./ChartCustomization";
+import { downloadChartAsImage, downloadDataAsCSV } from "./downloadUtils";
+import { DownloadMenu } from "./DownloadMenu";
 
 interface ChartWithControlsProps {
   data: any[];
@@ -44,6 +46,9 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
   lines,
   height = 400,
 }) => {
+  // Reference to chart container for downloads
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+
   // State for domains
   const [currentXDomain, setCurrentXDomain] = useState(xAxis.domain);
   const [currentYDomain, setCurrentYDomain] = useState(yAxis.domain);
@@ -62,6 +67,14 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
     defaultChartStyle(lines)
   );
 
+  // Store initial style for reset
+  const initialStyle = useRef<ChartStyle>(null!);
+
+  // Initialize initial style
+  useEffect(() => {
+    initialStyle.current = defaultChartStyle(lines);
+  }, [lines]);
+
   const handleReset = useCallback(() => {
     console.log("Resetting...");
     setCurrentXDomain(xAxis.domain);
@@ -70,6 +83,11 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
     // Reset the brush range
     setBrushStartIndex(0);
     setBrushEndIndex(data.length - 1);
+
+    // Reset chart style to initial
+    if (initialStyle.current) {
+      setChartStyle(initialStyle.current);
+    }
   }, [xAxis.domain, yAxis.domain, data.length]);
 
   const handleBrush = useCallback(
@@ -86,12 +104,27 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
     [data, xAxis.key]
   );
 
+  // Handle downloads
+  const handleDownloadImage = useCallback(() => {
+    const title = chartStyle.title || "chart";
+    downloadChartAsImage(
+      chartContainerRef,
+      `${title.replace(/\s+/g, "-").toLowerCase()}.png`
+    );
+  }, [chartStyle.title]);
+
+  const handleDownloadData = useCallback(() => {
+    const title = chartStyle.title || "chart-data";
+    downloadDataAsCSV(data, `${title.replace(/\s+/g, "-").toLowerCase()}.csv`);
+  }, [data, chartStyle.title]);
+
   return (
     <div
       className="relative"
       style={{ height }}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
+      ref={chartContainerRef}
     >
       {/* Add title display */}
       {chartStyle.title && (
@@ -127,15 +160,10 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
           >
             <FiRefreshCw size={16} />
           </button>
-          <button
-            onClick={() => {
-              /* Download implementation coming next */
-            }}
-            className="p-1.5 rounded hover:bg-gray-200 text-gray-700"
-            title="Download"
-          >
-            <FiDownload size={16} />
-          </button>
+          <DownloadMenu
+            onDownloadImage={handleDownloadImage}
+            onDownloadData={handleDownloadData}
+          />
         </div>
       )}
 
@@ -181,6 +209,8 @@ export const ChartWithControls: React.FC<ChartWithControlsProps> = ({
             startIndex={brushStartIndex}
             endIndex={brushEndIndex}
             onChange={handleBrush}
+            y={300}
+            fill="#fff"
           />
           {/* Update Line components to use custom styles */}
           {chartStyle.lines.map((line) => (
