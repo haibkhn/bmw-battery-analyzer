@@ -118,9 +118,8 @@ https://drive.google.com/file/d/16MKlxIJn9_ng7d0Ylw4aHPRetkUmMfpf/view?usp=shari
    ```
 
 6. Configure environment variables:
-   - Copy `.env.example` to `.env` in the backend directory
    - Update the following variables:
-     ```env
+     ```.env
      # Database Configuration
      DB_HOST=localhost
      DB_PORT=5432
@@ -136,9 +135,6 @@ https://drive.google.com/file/d/16MKlxIJn9_ng7d0Ylw4aHPRetkUmMfpf/view?usp=shari
    ```bash
    cd backend
    npm run migrate
-   
-   # Optional: Run seeds if you want sample data
-   npm run seed
    ```
 
 8. Start the development servers:
@@ -171,7 +167,6 @@ https://drive.google.com/file/d/16MKlxIJn9_ng7d0Ylw4aHPRetkUmMfpf/view?usp=shari
    - Configure display settings
 
 3. **Interact with Charts**
-   - Use mouse wheel or pinch gestures to zoom
    - Click and drag to pan across the visualization
    - Use the control panel to adjust display settings
    - Filter data based on specific criteria
@@ -180,32 +175,6 @@ https://drive.google.com/file/d/16MKlxIJn9_ng7d0Ylw4aHPRetkUmMfpf/view?usp=shari
    - Download visualizations as images
    - Export processed data in various formats
    - Generate analysis reports
-
-## 📁 Project Structure
-
-```
-bmw-battery-analyzer/
-├── frontend/                # React frontend application
-│   ├── src/                # Source files
-│   ├── public/             # Static files
-│   └── package.json        # Frontend dependencies
-├── backend/                # Node.js backend server
-│   ├── src/               # Source files
-│   ├── migrations/        # Database migrations
-│   ├── seeds/            # Database seeds
-│   ├── uploads/           # File upload directory
-│   └── package.json       # Backend dependencies
-└── sample_data/           # Sample CSV files for testing
-```
-
-## 🗄️ Database Schema
-
-The application uses the following main tables:
-
-- `users` - User authentication and preferences
-- `files` - Uploaded file metadata
-- `battery_data` - Processed battery test data
-- `configurations` - User visualization configurations
 
 ## 🔍 Troubleshooting
 
