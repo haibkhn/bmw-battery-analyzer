@@ -29,7 +29,7 @@ const FileUploadArea = ({ onDataLoaded }: FileUploadAreaProps) => {
               totalRows: response.data.length,
               type: response.stats.type,
             });
-            onDataLoaded(response); // Pass the complete response
+            onDataLoaded(response);
           } catch (error) {
             console.error("Error loading data:", error);
             setError("Error loading data after processing");

@@ -32,6 +32,13 @@ const ChartArea: React.FC<ChartAreaProps> = ({ data, type }) => {
   const cycleStats = useCycleStats(data, type);
   const metrics = useMetrics(type, mode);
 
+  // Update the onCycleChange handler
+  const handleCycleChange = (cycle: number | null) => {
+    setSelectedCycle(cycle);
+    // Set showDetail to true whenever a cycle is selected
+    setShowDetail(!!cycle);
+  };
+
   // Get unique cycles
   const cycles = useMemo(() => {
     const uniqueCycles = [...new Set(data.map((item) => item.cycle_number))];
@@ -183,7 +190,7 @@ const ChartArea: React.FC<ChartAreaProps> = ({ data, type }) => {
         onConfigChange={setConfig}
         metrics={metrics}
         selectedCycle={selectedCycle}
-        onCycleChange={setSelectedCycle}
+        onCycleChange={handleCycleChange} // Use the updated handler
         cycles={cycles}
         type={type}
         mode={mode}
@@ -227,7 +234,10 @@ const ChartArea: React.FC<ChartAreaProps> = ({ data, type }) => {
           mode === "cycle_analysis" && (
             <CycleDetailChart
               cycleData={cycleDetailData}
-              onClose={() => setShowDetail(false)}
+              onClose={() => {
+                setShowDetail(false);
+                setSelectedCycle(null); // Also clear the selected cycle when closing
+              }}
               cycleNumber={selectedCycle}
               domains={detailDomains}
             />

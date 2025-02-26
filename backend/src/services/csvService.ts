@@ -62,7 +62,7 @@ export class CSVService {
 
                   if (batch.length >= batchSize) {
                     await this.insertBatch(batch);
-                    console.log(`Processed ${rowCount} rows`);
+                    // console.log(`Processed ${rowCount} rows`);
                     // Update status after each batch
                     this.updateStatus(fileId, {
                       processed: rowCount,
@@ -186,7 +186,7 @@ export class CSVService {
     const currentStatus = this.processStatusMap.get(fileId);
     if (currentStatus) {
       const newStatus = { ...currentStatus, ...update };
-      console.log("Updating status:", newStatus);
+      // console.log("Updating status:", newStatus);
       this.processStatusMap.set(fileId, newStatus);
     }
   }
