@@ -1,4 +1,3 @@
-// components/charts/downloadUtils.ts
 import React, { useState, useRef, useEffect } from "react";
 import { FiDownload, FiChevronDown } from "react-icons/fi";
 

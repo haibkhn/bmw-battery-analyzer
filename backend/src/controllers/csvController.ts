@@ -5,8 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 export const csvController = {
   uploadFile: async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log("Upload request received");
-      console.log("File:", req.file);
+      // console.log("Upload request received");
+      // console.log("File:", req.file);
 
       if (!req.file) {
         console.log("No file in request");
@@ -18,7 +18,7 @@ export const csvController = {
       }
 
       const fileId = uuidv4();
-      console.log("Generated fileId:", fileId);
+      // console.log("Generated fileId:", fileId);
 
       // Start processing in background
       csvService
@@ -42,11 +42,11 @@ export const csvController = {
 
   getProcessStatus: async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log("Status request received for fileId:", req.params.fileId);
+      // console.log("Status request received for fileId:", req.params.fileId);
       const { fileId } = req.params;
       const status = csvService.getProcessStatus(fileId);
 
-      console.log("Status found:", status);
+      // console.log("Status found:", status);
 
       if (!status) {
         res.status(404).json({
@@ -69,14 +69,14 @@ export const csvController = {
 
   getData: async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log("Fetching data from service...");
+      // console.log("Fetching data from service...");
 
       const result = await csvService.getData();
 
-      console.log("Data fetched:", {
-        rowCount: result.data.length,
-        stats: result.stats,
-      });
+      // console.log("Data fetched:", {
+      //   rowCount: result.data.length,
+      //   stats: result.stats,
+      // });
 
       res.json({
         success: true,
